@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duct Tape — Concept C · Rugged &amp; Scrappy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14140f;
+  --kraft:#d9cdb4;
+  --kraft2:#cfc1a4;
+  --paper:#efe7d6;
+  --orange:#f16935;
+  --teal:#00b8a1;
+  --mustard:#d9a515;
+  --line:rgba(20,20,15,.22);
+  --muted:rgba(20,20,15,.66);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--kraft);color:var(--ink);
+  font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 18% 12%,rgba(255,255,255,.35),transparent 38%),
+    radial-gradient(circle at 82% 78%,rgba(20,20,15,.10),transparent 45%),
+    repeating-linear-gradient(94deg,rgba(20,20,15,.035) 0 1px,transparent 1px 4px),
+    repeating-linear-gradient(2deg,rgba(20,20,15,.028) 0 1px,transparent 1px 6px);
+}
+.wrap{max-width:1140px;margin:0 auto;padding:0 26px}
+h1,h2,h3,.cond{font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;line-height:.94;letter-spacing:.005em}
+h1{font-size:clamp(56px,9vw,124px)}
+h2{font-size:clamp(36px,5vw,64px)}
+h3{font-size:24px;font-weight:700}
+p{font-size:16.5px;color:var(--muted)}
+.lead{font-size:clamp(17px,1.5vw,20px);max-width:56ch;color:rgba(20,20,15,.78)}
+.stencil{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.22em;font-size:13px}
+.marker{font-family:'Permanent Marker',cursive;text-transform:none;letter-spacing:0;line-height:1.2}
+
+/* ---------- duct tape strip ---------- */
+.tape{
+  position:relative;display:inline-block;flex:none;white-space:nowrap;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.20) 0 1px,transparent 1px 3px),
+    repeating-linear-gradient(0deg,rgba(0,0,0,.10) 0 1px,transparent 1px 5px),
+    linear-gradient(180deg,#c9ccce,#a8adb1 45%,#9aa0a4 55%,#b9bec1);
+  box-shadow:0 4px 14px -6px rgba(20,20,15,.6);
+  clip-path:polygon(0 6%,3% 0,12% 5%,24% 1%,38% 6%,52% 1%,66% 6%,80% 1%,92% 6%,100% 2%,100% 94%,94% 100%,82% 95%,68% 100%,54% 94%,40% 100%,26% 95%,13% 100%,4% 95%,0 99%);
+}
+.tape.ink{background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.10) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,#3b3f42,#232629 50%,#33373a);color:#f2efe6}
+.tape.orange{background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,#f5804f,#e05c2b 55%,#f0713c);color:#fff}
+.tapepad{padding:12px 26px;display:inline-block}
+
+/* ---------- nav ---------- */
+nav{border-bottom:2px solid var(--ink);position:sticky;top:0;z-index:50;background:rgba(217,205,180,.94);backdrop-filter:blur(6px)}
+.nav{display:flex;align-items:center;gap:18px;height:74px}
+.mark{width:40px;height:40px;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:'Barlow Condensed';font-weight:800;font-size:15px;letter-spacing:.04em;transform:rotate(-2deg)}
+.brand{font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;font-size:19px;letter-spacing:.06em;line-height:1}
+.brand small{display:block;font-family:'Space Grotesk';font-weight:500;font-size:9.5px;letter-spacing:.22em;color:var(--muted);margin-top:3px}
+.navlinks{margin-left:auto;display:flex;gap:24px}
+.navlinks a{color:var(--ink);text-decoration:none;font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;font-size:16px;letter-spacing:.09em}
+.navlinks a:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;font-size:18px;letter-spacing:.09em;text-decoration:none;color:inherit;transition:transform .12s}
+.btn:hover{transform:translateY(-2px) rotate(-.6deg)}
+.btn-sm{font-size:15px}
+
+/* ---------- hero ---------- */
+header{padding:84px 0 72px;position:relative;overflow:hidden}
+.stamp{
+  position:absolute;right:4%;top:64px;transform:rotate(-11deg);
+  border:3px solid var(--orange);color:var(--orange);padding:10px 18px;
+  font-family:'Barlow Condensed';font-weight:800;text-transform:uppercase;letter-spacing:.14em;font-size:19px;
+  opacity:.8;border-radius:4px;text-align:center;line-height:1
+}
+.stamp small{display:block;font-size:11px;letter-spacing:.2em;margin-top:5px;opacity:.85}
+.hero-eyebrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:26px}
+h1 .taped{position:relative;display:inline-block;z-index:0;padding:0 .06em}
+h1 .taped::before{
+  content:"";position:absolute;left:-2%;right:-2%;top:8%;height:84%;z-index:-1;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.20) 0 1px,transparent 1px 3px),
+    linear-gradient(180deg,#c9ccce,#a4a9ad 50%,#b7bcbf);
+  transform:rotate(-1.6deg);opacity:.94;
+  clip-path:polygon(0 8%,4% 0,16% 7%,30% 1%,46% 8%,62% 1%,78% 8%,90% 1%,100% 7%,100% 92%,88% 100%,74% 93%,58% 100%,42% 93%,28% 100%,14% 93%,3% 100%,0 92%);
+  box-shadow:0 3px 10px -5px rgba(20,20,15,.7);
+}
+.hero-sub{margin:30px 0 34px}
+.acts{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.scrawl{font-family:'Permanent Marker';font-size:17px;color:var(--orange);transform:rotate(-2.5deg);display:inline-block}
+
+/* ---------- torn divider ---------- */
+.rip{height:26px;background:var(--ink);
+  clip-path:polygon(0 40%,3% 10%,7% 55%,12% 15%,17% 60%,22% 20%,28% 62%,34% 18%,40% 58%,46% 22%,52% 60%,58% 16%,64% 58%,70% 20%,76% 62%,82% 18%,88% 56%,93% 22%,97% 58%,100% 30%,100% 100%,0 100%)}
+
+/* ---------- inventory ---------- */
+.dark{background:var(--ink);color:var(--paper);padding:84px 0}
+.dark p{color:rgba(239,231,214,.68)}
+.dark .lead{color:rgba(239,231,214,.82)}
+.dark .stencil{color:var(--mustard)}
+.checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px dashed rgba(239,231,214,.3);margin-top:44px}
+.item{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:22px 8px;border-bottom:1px dashed rgba(239,231,214,.3);align-items:start}
+.item:nth-child(odd){border-right:1px dashed rgba(239,231,214,.3);padding-right:26px}
+.item:nth-child(even){padding-left:26px}
+.box{width:30px;height:30px;border:2px solid var(--paper);display:grid;place-items:center;font-family:'Permanent Marker';font-size:19px;color:var(--orange);margin-top:2px}
+.item h3{font-size:22px;margin-bottom:6px}
+.item p{font-size:14.5px}
+.item .no{font-family:'Barlow Condensed';font-weight:800;font-size:13px;letter-spacing:.16em;color:var(--mustard);display:block;margin-bottom:3px}
+
+/* ---------- how ---------- */
+section{padding:88px 0}
+.sec-head{max-width:60ch;margin-bottom:46px}
+.sec-head h2{margin:14px 0 16px}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.card{background:var(--paper);border:2px solid var(--ink);padding:28px;box-shadow:6px 6px 0 var(--ink);position:relative}
+.card:nth-child(2){transform:rotate(.5deg)}
+.card:nth-child(3){transform:rotate(-.4deg)}
+.card .step{position:absolute;top:-16px;left:22px;background:var(--orange);color:#fff;font-family:'Barlow Condensed';font-weight:800;font-size:15px;letter-spacing:.14em;padding:5px 13px;text-transform:uppercase}
+.card h3{margin:16px 0 10px}
+.card p{font-size:15px}
+
+/* ---------- receipt / what you get ---------- */
+.receipt{background:var(--paper);border:2px solid var(--ink);padding:34px 32px;box-shadow:8px 8px 0 rgba(20,20,15,.85)}
+.rline{display:flex;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px dashed var(--line);font-family:'Space Grotesk';font-size:15px}
+.rline b{font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:17px}
+.rtotal{display:flex;justify-content:space-between;padding-top:18px;align-items:baseline}
+.rtotal .cond{font-size:30px}
+
+/* ---------- cta ---------- */
+.cta{background:var(--ink);color:var(--paper);padding:76px 0;position:relative;overflow:hidden}
+.cta h2{color:var(--paper)}
+.cta p{color:rgba(239,231,214,.72)}
+.tapeX{position:absolute;width:340px;height:56px;opacity:.9}
+
+footer{padding:46px 0 66px;font-size:14px;color:var(--muted);border-top:2px solid var(--ink)}
+.foot{display:flex;justify-content:space-between;gap:26px;flex-wrap:wrap}
+.note{margin-top:20px;font-family:'Barlow Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:12px;opacity:.6}
+
+@media(max-width:900px){
+  .checklist{grid-template-columns:1fr}
+  .item:nth-child(odd){border-right:0;padding-right:8px}
+  .item:nth-child(even){padding-left:8px}
+  .cards3{grid-template-columns:1fr}
+  #get .wrap{grid-template-columns:1fr!important;gap:38px!important}
+  .navlinks{display:none}
+  .stamp{display:none}
+  section,.dark,.cta{padding:60px 0}
+}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav">
+  <div class="mark">A+B</div>
+  <div class="brand">Duct Tape<small>BY ATOM &amp; BITS</small></div>
+  <div class="navlinks">
+    <a href="#inventory">The inventory</a>
+    <a href="#how">How it works</a>
+    <a href="#get">What you get</a>
+  </div>
+  <a class="tape orange btn btn-sm" href="#start"><span class="tapepad">Start free →</span></a>
+</div></nav>
+
+<header>
+  <div class="wrap">
+    <div class="stamp">Free · 3 min<small>No email required</small></div>
+    <div class="hero-eyebrow">
+      <span class="tape ink"><span class="tapepad stencil">8 questions</span></span>
+      <span class="stencil" style="color:var(--muted)">Operations · IT · L&amp;D</span>
+    </div>
+    <h1>Every operation<br>runs on some<br><span class="taped">duct tape.</span></h1>
+    <div class="hero-sub">
+      <p class="lead">Find out where yours is holding — and where it's about to give. Three minutes, eight straight questions, and an honest read on what's actually holding your operations together.</p>
+    </div>
+    <div class="acts">
+      <a class="tape orange btn" href="#start"><span class="tapepad" style="padding:16px 34px;font-size:21px">Find my duct tape →</span></a>
+      <a class="tape btn" href="#get"><span class="tapepad" style="padding:16px 30px;font-size:19px;color:var(--ink)">See a sample</span></a>
+      <span class="scrawl">no email gate ✎</span>
+    </div>
+  </div>
+</header>
+
+<div class="rip"></div>
+
+<div class="dark" id="inventory"><div class="wrap">
+  <div class="sec-head">
+    <div class="stencil">The inventory</div>
+    <h2 style="margin:14px 0 16px">Eight places<br>the tape hides.</h2>
+    <p class="lead">Everybody's got some. The process that only works because one person remembers how. The spreadsheet nobody else understands. The fix that was only ever supposed to be temporary. We just check which ones are load-bearing.</p>
+  </div>
+  <div class="checklist">
+    <div class="item"><div class="box">✕</div><div><span class="no">01 · CORE</span><h3>Workflow Maturity</h3><p>Real process, or remembered process?</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">02 · CORE</span><h3>Legacy Knowledge Risk</h3><p>What happens the week that one person takes leave.</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">03 · CORE</span><h3>Operational Clarity</h3><p>Does the SOP survive contact with an exception?</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">04 · HUMAN</span><h3>Human Adoption</h3><p>New tool shows up. Curiosity, or another workaround?</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">05 · HUMAN</span><h3>Leadership Alignment</h3><p>Do the people paying for it agree on what "it" is?</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">06 · HUMAN</span><h3>Learning Capacity</h3><p>How much change can land before fatigue sets in.</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">07 · GOV</span><h3>Governance &amp; Trust</h3><p>Who signs off, who gets told, what's written down.</p></div></div>
+    <div class="item"><div class="box">✕</div><div><span class="no">08 · GOV</span><h3>Data Reliability</h3><p>Does the system number match the number people actually use?</p></div></div>
+  </div>
+  <p class="marker" style="color:var(--orange);font-size:20px;margin-top:34px;transform:rotate(-1deg)">Four of these can blow the whole score on their own.</p>
+</div></div>
+
+<section id="how"><div class="wrap">
+  <div class="sec-head">
+    <div class="stencil" style="color:var(--orange)">How it works</div>
+    <h2 style="margin:14px 0 16px">Three minutes.<br>No consultant-speak.</h2>
+  </div>
+  <div class="cards3">
+    <div class="card"><div class="step">Step 01</div><h3>Answer eight</h3><p>Plain questions in plain language. Pick the answer that's true on a Tuesday, not the one that looks good in a deck.</p></div>
+    <div class="card"><div class="step">Step 02</div><h3>Get the map</h3><p>A score out of five, eight dimensions colored green / yellow / red, and any risk bad enough to override the average.</p></div>
+    <div class="card"><div class="step">Step 03</div><h3>Fix the first thing</h3><p>You leave knowing what to shore up first. Want it stress-tested with your leadership team? That's the next conversation.</p></div>
+  </div>
+</div></section>
+
+<section id="get" style="padding-top:0"><div class="wrap" style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center">
+  <div>
+    <div class="stencil" style="color:var(--orange)">What you walk away with</div>
+    <h2 style="margin:14px 0 18px">An honest read.<br>Not a sales pitch<br>in a quiz costume.</h2>
+    <p class="lead">No lead-gen wall, no "download the PDF to see your result." You see the whole thing in the browser, the moment you finish.</p>
+    <p class="marker" style="color:var(--orange);font-size:19px;margin-top:26px;transform:rotate(-1.5deg)">— and yes, it's actually free</p>
+  </div>
+  <div class="receipt">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:16px;border-bottom:2px solid var(--ink)">
+      <span class="cond" style="font-size:26px">Your readout</span>
+      <span class="stencil" style="color:var(--muted)">EST. 3 MIN</span>
+    </div>
+    <div class="rline"><b>Composite readiness score</b><span>1.0 – 5.0</span></div>
+    <div class="rline"><b>Dimension heatmap</b><span>8 bands</span></div>
+    <div class="rline"><b>Weighted pillar breakdown</b><span>3 pillars</span></div>
+    <div class="rline"><b>Critical flags, named</b><span>if any fire</span></div>
+    <div class="rline"><b>What to shore up first</b><span>prioritized</span></div>
+    <div class="rtotal"><span class="cond">Total</span><span class="cond" style="color:var(--orange)">$0</span></div>
+  </div>
+</div></section>
+
+<div class="rip" style="transform:scaleY(-1)"></div>
+
+<div class="cta" id="start"><div class="wrap" style="text-align:center;position:relative;z-index:1">
+  <div class="stencil" style="color:var(--mustard)">Last thing</div>
+  <h2 style="margin:16px 0 20px;font-size:clamp(40px,6.5vw,86px)">Find the tape<br>before it gives.</h2>
+  <p style="max-width:52ch;margin:0 auto 34px;font-size:18px">Eight questions. Three minutes. A clear picture of where your organization actually stands — operations, people, and governance.</p>
+  <div class="acts" style="justify-content:center">
+    <a class="tape orange btn" href="#"><span class="tapepad" style="padding:18px 40px;font-size:23px">Start the assessment →</span></a>
+    <a class="tape btn" href="#"><span class="tapepad" style="padding:18px 32px;font-size:20px;color:var(--ink)">Book a working session</span></a>
+  </div>
+</div></div>
+
+<footer><div class="wrap foot">
+  <div>
+    <div style="display:flex;gap:14px;align-items:center"><div class="mark">A+B</div><div class="brand">Duct Tape<small>BY ATOM &amp; BITS</small></div></div>
+    <div style="max-width:46ch;margin-top:16px">Karina McGill, founder, works directly with operations and technology leaders to help organizations become AI-ready.</div>
+    <div class="note">Concept C — Rugged &amp; Scrappy · "Duct Tape" is a working code name</div>
+  </div>
+  <div style="display:grid;gap:8px">
+    <a href="#inventory" style="color:inherit">The inventory</a>
+    <a href="#how" style="color:inherit">How it works</a>
+    <a href="#get" style="color:inherit">What you get</a>
+    <a href="#start" style="color:inherit">Start free</a>
+  </div>
+</div></footer>
+
+</body>
+</html>

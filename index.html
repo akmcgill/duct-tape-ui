@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duct Tape — landing page concepts</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0f171f;--cream:#f8f5ee;--orange:#f16935;--teal:#00b8a1;--card:#efebe1;--hair:rgba(15,23,31,.14);--muted:rgba(15,23,31,.62)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:72px 28px 96px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--orange)}
+h1{font-size:clamp(34px,5vw,52px);font-weight:700;letter-spacing:-.025em;line-height:1.05;margin:14px 0 16px}
+.lead{font-size:18px;color:var(--muted);max-width:58ch}
+.note{margin-top:22px;font-size:13.5px;color:var(--muted);border-left:3px solid var(--teal);padding-left:16px;max-width:60ch}
+.grid{display:grid;gap:16px;margin-top:52px}
+a.concept{
+  display:grid;grid-template-columns:64px 1fr auto;gap:22px;align-items:center;
+  background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:26px 28px;
+  text-decoration:none;color:inherit;transition:transform .15s ease,box-shadow .15s ease}
+a.concept:hover{transform:translateY(-2px);box-shadow:0 14px 34px -22px rgba(15,23,31,.7)}
+.swatch{width:64px;height:64px;border-radius:12px;border:1px solid var(--hair);flex:none}
+.s-a{background:linear-gradient(135deg,#f8f5ee 0 50%,#f16935 50% 78%,#00b8a1 78%)}
+.s-b{background:linear-gradient(135deg,#0b0d10 0 50%,#e5c04a 50% 78%,#ef6a5c 78%)}
+.s-c{background:linear-gradient(135deg,#d9cdb4 0 50%,#a8adb1 50% 78%,#f16935 78%)}
+.concept h2{font-size:21px;font-weight:700;letter-spacing:-.015em;line-height:1.2}
+.concept p{font-size:14.5px;color:var(--muted);margin-top:5px;max-width:52ch}
+.concept .go{font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);white-space:nowrap}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+footer{margin-top:56px;padding-top:26px;border-top:1px solid var(--hair);font-size:13px;color:var(--muted)}
+@media(max-width:640px){
+  a.concept{grid-template-columns:44px 1fr;gap:16px;padding:20px}
+  .swatch{width:44px;height:44px}
+  .concept .go{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Atom &amp; Bits · internal review</div>
+  <h1>Duct Tape — landing page concepts</h1>
+  <p class="lead">Three directions for the Tier 1 diagnostic landing page. Each is a full responsive page — open one and scroll, or narrow your window to check mobile.</p>
+  <p class="note"><strong>"Duct Tape" is a working code name.</strong> These are internal design explorations, not a launched product page. Nothing here is final copy.</p>
+
+  <div class="grid">
+    <a class="concept" href="01-atomic-age.html">
+      <div class="swatch s-a"></div>
+      <div><span class="tag">Concept A</span><h2>Atomic Age Playful</h2><p>Straight off Style Guide v2 — cream and ink, Space Grotesk, orbit motif, orange pill CTAs. Warmest and most on-brand.</p></div>
+      <div class="go">View →</div>
+    </a>
+    <a class="concept" href="02-instrument-panel.html">
+      <div class="swatch s-b"></div>
+      <div><span class="tag">Concept B</span><h2>Instrument Panel</h2><p>Derived from the Figma heatmap report — dark, mono labels, and a live sample readout in the hero. Most continuity with the report itself.</p></div>
+      <div class="go">View →</div>
+    </a>
+    <a class="concept" href="03-rugged-scrappy.html">
+      <div class="swatch s-c"></div>
+      <div><span class="tag">Concept C</span><h2>Rugged &amp; Scrappy</h2><p>The name taken literally — kraft surface, stencil headlines, torn tape strips, marker scrawls. Most memorable, highest risk.</p></div>
+      <div class="go">View →</div>
+    </a>
+  </div>
+
+  <footer>Atom &amp; Bits · Karina McGill · design pass 1, August 2026</footer>
+</div>
+</body>
+</html>

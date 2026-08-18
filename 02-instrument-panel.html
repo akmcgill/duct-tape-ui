@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duct Tape — Concept B · Instrument Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d10;
+  --panel:#12151a;
+  --panel2:#171b21;
+  --line:rgba(255,255,255,.09);
+  --line2:rgba(255,255,255,.16);
+  --txt:#e9ebee;
+  --dim:rgba(233,235,238,.52);
+  --dimmer:rgba(233,235,238,.34);
+  --crit:#ef6a5c;      /* 1 · critical */
+  --high:#f0894a;      /* 2 · high */
+  --elev:#e5c04a;      /* 3 · elevated */
+  --stab:#5fbf7e;      /* 4 · stable */
+  --heal:#3fae74;      /* 5 · healthy */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 26px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.19em;text-transform:uppercase;color:var(--dimmer)}
+h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.08}
+h1{font-size:clamp(40px,5.4vw,68px)}
+h2{font-size:clamp(26px,3vw,38px)}
+h3{font-size:16px;font-weight:600;letter-spacing:0}
+p{font-size:16px;color:var(--dim)}
+.lead{font-size:17.5px;max-width:60ch;color:var(--dim)}
+
+/* nav */
+nav{border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40;background:rgba(11,13,16,.9);backdrop-filter:blur(12px)}
+.nav{display:flex;align-items:center;gap:14px;height:64px}
+.mark{width:26px;height:34px;border:1px solid var(--line2);border-radius:4px;display:grid;place-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;line-height:1.15;text-align:center;color:var(--dim)}
+.brandtxt{line-height:1.15}
+.brandtxt b{font-size:13px;letter-spacing:.06em}
+.navtabs{display:flex;gap:6px;margin-left:26px}
+.tab{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.08em;padding:7px 13px;border-radius:6px;color:var(--dim);text-decoration:none;border:1px solid transparent}
+.tab.on{background:var(--panel2);border-color:var(--line);color:var(--txt)}
+.status{margin-left:auto;display:flex;align-items:center;gap:9px;border:1px solid rgba(239,106,92,.45);background:rgba(239,106,92,.08);border-radius:999px;padding:7px 15px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--crit)}
+.status i{width:6px;height:6px;border-radius:50%;background:var(--crit);display:block}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;text-decoration:none;padding:15px 26px;border-radius:6px;border:1px solid var(--line2);color:var(--txt);transition:.15s}
+.btn-p{background:var(--elev);border-color:var(--elev);color:#151208;font-weight:700}
+.btn-p:hover{filter:brightness(1.1)}
+.btn-g:hover{background:var(--panel2)}
+
+/* hero */
+header{padding:76px 0 64px;position:relative;overflow:hidden}
+header::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px) 0 0/100% 34px,
+  linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px) 0 0/34px 100%;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000,transparent)}
+.hero{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.kicker{display:inline-flex;gap:14px;align-items:center;margin-bottom:24px}
+.kicker .chip{border:1px solid var(--line);border-radius:4px;padding:5px 11px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+h1 em{font-style:normal;color:var(--elev)}
+.hero .lead{margin:22px 0 32px}
+.acts{display:flex;gap:12px;flex-wrap:wrap}
+.foot-micro{margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--dimmer);text-transform:uppercase}
+
+/* panel + heatmap */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.panel-bd{padding:20px}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dimmer);letter-spacing:.05em}
+.legend i{width:8px;height:8px;border-radius:2px;display:block}
+.pillrow{display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px}
+.cells{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cell{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:13px 14px;overflow:hidden;min-height:104px;
+  display:grid;grid-template-columns:1fr auto;column-gap:10px;align-content:start;
+  grid-template-areas:"id sc" "nm bd" "mtr mtr"}
+.cell .id{grid-area:id;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--dimmer)}
+.cell .nm{grid-area:nm;font-size:13px;font-weight:600;margin-top:3px;letter-spacing:-.01em;line-height:1.25}
+.cell .sc{grid-area:sc;font-size:22px;font-weight:700;letter-spacing:-.02em;text-align:right;line-height:1}
+.cell .bd{grid-area:bd;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.05em;text-transform:uppercase;text-align:right;margin-top:5px}
+.cell .mtr{grid-area:mtr;height:4px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:14px;overflow:hidden;align-self:end}
+.cell .mtr i{display:block;height:100%;border-radius:2px}
+
+/* stat row */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat{padding:26px 22px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat b{display:block;font-size:30px;font-weight:700;letter-spacing:-.03em;margin-top:8px}
+
+section{padding:88px 0}
+.sec-head{margin-bottom:44px;max-width:62ch}
+.sec-head h2{margin:12px 0 14px}
+
+.rows{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.row{display:grid;grid-template-columns:110px 1fr 2fr;gap:20px;padding:18px 22px;border-bottom:1px solid var(--line);align-items:center}
+.row:last-child{border-bottom:0}
+.row:nth-child(odd){background:var(--panel)}
+.row .code{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.1em}
+.row h3{font-size:15px}
+.row p{font-size:14px}
+
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:26px}
+.card .n{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--elev)}
+.card h3{margin:14px 0 10px;font-size:18px;font-weight:700;letter-spacing:-.01em}
+.card p{font-size:14.5px}
+
+.ctaband{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,var(--panel),#0e1115);padding:56px 46px;display:flex;gap:36px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.flagbox{border:1px solid rgba(239,106,92,.4);background:rgba(239,106,92,.06);border-radius:10px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start;margin:26px 0}
+.flagbox b{color:var(--crit);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em}
+
+footer{border-top:1px solid var(--line);padding:44px 0 64px}
+.foot{display:flex;justify-content:space-between;gap:26px;flex-wrap:wrap;font-size:14px;color:var(--dim)}
+.note{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer)}
+
+@media(max-width:960px){
+  .hero{grid-template-columns:1fr;gap:44px}
+  .cells{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat:nth-child(2){border-right:0}
+  .stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--line)}
+  .three{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:8px}
+  .navtabs{display:none}
+  section{padding:64px 0}
+  .ctaband{padding:38px 24px}
+}
+@media(max-width:560px){ .cells{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav">
+  <div class="mark">A<br>&amp;<br>B</div>
+  <div class="brandtxt"><b>ATOM &amp; BITS</b><div class="lbl" style="font-size:9.5px">Operational readiness</div></div>
+  <div class="navtabs">
+    <a class="tab on" href="#top">Overview</a>
+    <a class="tab" href="#matrix">Diagnostic matrix</a>
+    <a class="tab" href="#method">Method</a>
+    <a class="tab" href="#start">Run assessment</a>
+  </div>
+  <div class="status"><i></i> Free · 3 min · pre-flight</div>
+</div></nav>
+
+<header id="top">
+  <div class="wrap hero">
+    <div>
+      <div class="kicker">
+        <span class="chip">8 dimensions</span>
+        <span class="chip">3 pillars</span>
+        <span class="chip">1 composite</span>
+      </div>
+      <h1>Every operation runs on some <em>duct tape</em>.</h1>
+      <p class="lead">Find out where yours is holding — and where it's about to give. A three-minute diagnostic that returns a weighted readiness score, an eight-dimension heatmap, and any risk that's severe enough to override the average.</p>
+      <div class="acts">
+        <a class="btn btn-p" href="#start">Run the assessment →</a>
+        <a class="btn btn-g" href="#matrix">View sample output</a>
+      </div>
+      <div class="foot-micro">No email gate · Results in-session · Ops · IT · L&amp;D</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hd">
+        <div>
+          <div class="lbl">Sample output — precision auto components</div>
+          <div style="font-size:15px;font-weight:600;margin-top:4px">Composite 2.3 <span class="mono" style="color:var(--dimmer);font-size:12px">/ 5.0</span></div>
+        </div>
+        <div class="mono" style="font-size:11px;letter-spacing:.12em;color:var(--crit);text-transform:uppercase">High risk</div>
+      </div>
+      <div class="panel-bd">
+        <div class="legend">
+          <span><i style="background:var(--crit)"></i>1 · Critical</span>
+          <span><i style="background:var(--high)"></i>2 · High</span>
+          <span><i style="background:var(--elev)"></i>3 · Elevated</span>
+          <span><i style="background:var(--stab)"></i>4 · Stable</span>
+          <span><i style="background:var(--heal)"></i>5 · Healthy</span>
+        </div>
+
+        <div class="pillrow"><span class="lbl">Operational core</span><span class="mono" style="font-size:10.5px;color:var(--dimmer)">weight 40% · avg 2.0</span></div>
+        <div class="cells">
+          <div class="cell"><div class="id">D01</div><div class="nm">Workflow Maturity</div><div class="sc" style="color:var(--high)">2.0</div><div class="bd" style="color:var(--high)">High</div><div class="mtr"><i style="width:40%;background:var(--high)"></i></div></div>
+          <div class="cell"><div class="id">D02</div><div class="nm">Legacy Knowledge</div><div class="sc" style="color:var(--crit)">1.0</div><div class="bd" style="color:var(--crit)">Critical</div><div class="mtr"><i style="width:20%;background:var(--crit)"></i></div></div>
+          <div class="cell"><div class="id">D03</div><div class="nm">Operational Clarity</div><div class="sc" style="color:var(--elev)">3.0</div><div class="bd" style="color:var(--elev)">Elevated</div><div class="mtr"><i style="width:60%;background:var(--elev)"></i></div></div>
+        </div>
+
+        <div class="pillrow"><span class="lbl">Human &amp; adoption</span><span class="mono" style="font-size:10.5px;color:var(--dimmer)">weight 35% · avg 2.7</span></div>
+        <div class="cells">
+          <div class="cell"><div class="id">D04</div><div class="nm">Human Adoption</div><div class="sc" style="color:var(--high)">2.0</div><div class="bd" style="color:var(--high)">High</div><div class="mtr"><i style="width:40%;background:var(--high)"></i></div></div>
+          <div class="cell"><div class="id">D05</div><div class="nm">Leadership Align.</div><div class="sc" style="color:var(--elev)">3.0</div><div class="bd" style="color:var(--elev)">Elevated</div><div class="mtr"><i style="width:60%;background:var(--elev)"></i></div></div>
+          <div class="cell"><div class="id">D06</div><div class="nm">Learning Capacity</div><div class="sc" style="color:var(--stab)">4.0</div><div class="bd" style="color:var(--stab)">Stable</div><div class="mtr"><i style="width:80%;background:var(--stab)"></i></div></div>
+        </div>
+
+        <div class="pillrow"><span class="lbl">Governance &amp; data</span><span class="mono" style="font-size:10.5px;color:var(--dimmer)">weight 25% · avg 2.0</span></div>
+        <div class="cells" style="grid-template-columns:repeat(3,1fr)">
+          <div class="cell"><div class="id">D07</div><div class="nm">Governance &amp; Trust</div><div class="sc" style="color:var(--elev)">3.0</div><div class="bd" style="color:var(--elev)">Elevated</div><div class="mtr"><i style="width:60%;background:var(--elev)"></i></div></div>
+          <div class="cell"><div class="id">D08</div><div class="nm">Data Reliability</div><div class="sc" style="color:var(--crit)">1.0</div><div class="bd" style="color:var(--crit)">Critical</div><div class="mtr"><i style="width:20%;background:var(--crit)"></i></div></div>
+          <div class="cell" style="display:grid;place-content:center;text-align:center;background:transparent;border-style:dashed"><div class="lbl" style="letter-spacing:.14em">2 knockout<br>triggers fired</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap"><div class="stats">
+  <div class="stat"><div class="lbl">Questions</div><b>8</b></div>
+  <div class="stat"><div class="lbl">Time to complete</div><b>3 min</b></div>
+  <div class="stat"><div class="lbl">Weighted pillars</div><b>3</b></div>
+  <div class="stat"><div class="lbl">Cost</div><b>$0</b></div>
+</div></div>
+
+<section id="matrix"><div class="wrap">
+  <div class="sec-head">
+    <div class="lbl">Section 01 — what gets measured</div>
+    <h2>Eight dimensions, weighted into one number.</h2>
+    <p class="lead">Every organization has duct tape somewhere. The diagnostic finds the seams that are actually load-bearing — and won't let a strong average hide a critical one.</p>
+  </div>
+  <div class="rows">
+    <div class="row"><div class="code" style="color:var(--dimmer)">D01 · CORE</div><h3>Workflow Maturity</h3><p>How much of the work is documented process versus remembered process.</p></div>
+    <div class="row"><div class="code" style="color:var(--crit)">D02 · CORE</div><h3>Legacy Knowledge Risk</h3><p>Single-point-of-failure check. Fires a knockout at the lowest anchor.</p></div>
+    <div class="row"><div class="code" style="color:var(--crit)">D03 · CORE</div><h3>Operational Clarity</h3><p>Whether the SOP survives contact with an exception. Branching-SOP knockout.</p></div>
+    <div class="row"><div class="code" style="color:var(--crit)">D04 · HUMAN</div><h3>Human Adoption Readiness</h3><p>Curiosity or workaround. Active-sabotage knockout at the lowest anchor.</p></div>
+    <div class="row"><div class="code" style="color:var(--dimmer)">D05 · HUMAN</div><h3>Leadership Alignment</h3><p>Whether the people funding the work agree on what the work is.</p></div>
+    <div class="row"><div class="code" style="color:var(--dimmer)">D06 · HUMAN</div><h3>Organizational Learning Capacity</h3><p>How much change the organization can absorb before fatigue sets in.</p></div>
+    <div class="row"><div class="code" style="color:var(--dimmer)">D07 · GOV</div><h3>Governance &amp; Trust</h3><p>Who signs off, who gets told, and what actually gets written down.</p></div>
+    <div class="row"><div class="code" style="color:var(--crit)">D08 · GOV</div><h3>Data Reliability</h3><p>Whether the system number matches the number people use. Shadow-source knockout.</p></div>
+  </div>
+  <div class="flagbox">
+    <b>!</b>
+    <div><div style="font-weight:600;margin-bottom:4px">Four dimensions can override the whole score.</div><p style="font-size:14.5px">A single catastrophic answer can't be averaged away. If one of the four knockout conditions fires, the composite is forced to red and the trigger is named in your report.</p></div>
+  </div>
+</div></section>
+
+<section id="method" style="padding-top:0"><div class="wrap">
+  <div class="sec-head">
+    <div class="lbl">Section 02 — how it runs</div>
+    <h2>A conversation, then a readout.</h2>
+  </div>
+  <div class="three">
+    <div class="card"><div class="n">Step 01</div><h3>Eight questions</h3><p>Plain language, adapted to your role. An ops leader and an L&amp;D lead don't get the same wording.</p></div>
+    <div class="card"><div class="n">Step 02</div><h3>Deterministic scoring</h3><p>Weighted pillar averages, per-dimension banding, knockout override. Same answers, same score, every time.</p></div>
+    <div class="card"><div class="n">Step 03</div><h3>Your readout</h3><p>Composite score, eight-dimension heatmap, critical flags, and a prioritized read on what to shore up first.</p></div>
+  </div>
+</div></section>
+
+<section id="start" style="padding-top:0"><div class="wrap">
+  <div class="ctaband">
+    <div style="max-width:52ch">
+      <div class="lbl">Recommended next step</div>
+      <h2 style="margin:12px 0 14px">Find the tape before it gives.</h2>
+      <p>Three minutes, eight questions, no email required to see your result.</p>
+    </div>
+    <div class="acts">
+      <a class="btn btn-p" href="#">Run the assessment →</a>
+      <a class="btn btn-g" href="#">Book a working session</a>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap foot">
+  <div>
+    <div style="display:flex;gap:12px;align-items:center"><div class="mark">A<br>&amp;<br>B</div><b style="font-size:13px;letter-spacing:.06em">ATOM &amp; BITS</b></div>
+    <div style="max-width:46ch;margin-top:14px">Karina McGill, founder, works directly with operations and technology leaders to help organizations become AI-ready.</div>
+    <div class="note">Concept B — Instrument panel · derived from the Figma heatmap report · "Duct Tape" is a working code name</div>
+  </div>
+  <div style="display:grid;gap:8px">
+    <a href="#matrix" style="color:inherit;text-decoration:none">Diagnostic matrix</a>
+    <a href="#method" style="color:inherit;text-decoration:none">Method</a>
+    <a href="#start" style="color:inherit;text-decoration:none">Run assessment</a>
+  </div>
+</div></footer>
+
+</body>
+</html>
