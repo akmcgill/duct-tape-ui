@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duct Tape — conversational diagnostic prototype</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Barlow+Condensed:wght@600;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   THEME TOKENS — A (Atomic Age) / B (Instrument Panel) / C (Rugged)
+   ============================================================ */
+:root{
+  --bg:#f8f5ee; --surface:#efebe1; --surface2:#e7e2d5; --ink:#0f171f; --txt:#0f171f;
+  --muted:rgba(15,23,31,.62); --dimmer:rgba(15,23,31,.42); --line:rgba(15,23,31,.14);
+  --primary:#f16935; --onPrimary:#fff; --accent:#00b8a1;
+  --red:#f16935; --yellow:#d9a515; --green:#00b8a1;
+  --botBg:#efebe1; --botTxt:#0f171f; --userBg:#0f171f; --userTxt:#f8f5ee;
+  --panelBg:#f8f5ee; --headerBg:#0f171f; --headerTxt:#f8f5ee;
+  --r:16px; --rSm:12px; --rBtn:999px;
+  --fHead:'Space Grotesk',system-ui,sans-serif; --fBody:'Space Grotesk',system-ui,sans-serif;
+  --fMono:'Space Grotesk',system-ui,sans-serif;
+  --headTf:none; --headLs:-.02em; --headWt:700;
+  --lblLs:.16em; --shadow:0 30px 70px -40px rgba(15,23,31,.65);
+}
+[data-theme="b"]{
+  --bg:#0b0d10; --surface:#12151a; --surface2:#171b21; --ink:#e9ebee; --txt:#e9ebee;
+  --muted:rgba(233,235,238,.55); --dimmer:rgba(233,235,238,.34); --line:rgba(255,255,255,.10);
+  --primary:#e5c04a; --onPrimary:#151208; --accent:#5fbf7e;
+  --red:#ef6a5c; --yellow:#e5c04a; --green:#3fae74;
+  --botBg:#171b21; --botTxt:#e9ebee; --userBg:#e5c04a; --userTxt:#151208;
+  --panelBg:#0e1115; --headerBg:#12151a; --headerTxt:#e9ebee;
+  --r:12px; --rSm:8px; --rBtn:6px;
+  --fMono:'JetBrains Mono',ui-monospace,monospace;
+  --lblLs:.19em; --shadow:0 30px 70px -30px rgba(0,0,0,.9);
+}
+[data-theme="c"]{
+  --bg:#d9cdb4; --surface:#efe7d6; --surface2:#e4dac4; --ink:#14140f; --txt:#14140f;
+  --muted:rgba(20,20,15,.66); --dimmer:rgba(20,20,15,.44); --line:rgba(20,20,15,.24);
+  --primary:#f16935; --onPrimary:#fff; --accent:#d9a515;
+  --red:#e0522b; --yellow:#d9a515; --green:#3f8f5f;
+  --botBg:#efe7d6; --botTxt:#14140f; --userBg:#14140f; --userTxt:#efe7d6;
+  --panelBg:#e4dac4; --headerBg:#14140f; --headerTxt:#efe7d6;
+  --r:2px; --rSm:2px; --rBtn:2px;
+  --fHead:'Barlow Condensed',sans-serif;
+  --headTf:uppercase; --headLs:.01em; --headWt:800;
+  --lblLs:.2em; --shadow:10px 10px 0 rgba(20,20,15,.85);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--fBody);line-height:1.55;
+  -webkit-font-smoothing:antialiased;padding-top:56px;transition:background .25s,color .25s;
+}
+[data-theme="c"] body,body[data-theme="c"]{}
+html[data-theme="c"] body{background-image:
+  radial-gradient(circle at 18% 12%,rgba(255,255,255,.35),transparent 38%),
+  repeating-linear-gradient(94deg,rgba(20,20,15,.035) 0 1px,transparent 1px 4px)}
+h1,h2,h3,h4{font-family:var(--fHead);font-weight:var(--headWt);letter-spacing:var(--headLs);
+  text-transform:var(--headTf);line-height:1.06}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.lbl{font-family:var(--fMono);font-size:10.5px;letter-spacing:var(--lblLs);text-transform:uppercase;color:var(--dimmer)}
+
+/* ============================================================
+   PROTOTYPE CONTROL BAR  (not part of the design — a harness)
+   ============================================================ */
+#devbar{
+  position:fixed;top:0;left:0;right:0;height:56px;z-index:9000;
+  background:#101317;color:#e9ebee;display:flex;align-items:center;gap:18px;
+  padding:0 18px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  border-bottom:1px solid rgba(255,255,255,.12);overflow-x:auto;white-space:nowrap
+}
+#devbar .grp{display:flex;align-items:center;gap:8px}
+#devbar .tag{letter-spacing:.18em;text-transform:uppercase;color:rgba(233,235,238,.45)}
+#devbar .seg{display:flex;border:1px solid rgba(255,255,255,.18);border-radius:6px;overflow:hidden}
+#devbar .seg button{padding:6px 11px;font-size:11px;color:rgba(233,235,238,.6);letter-spacing:.06em}
+#devbar .seg button.on{background:#e5c04a;color:#151208;font-weight:700}
+#devbar .act{border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:6px 12px;
+  font-size:11px;color:rgba(233,235,238,.8);letter-spacing:.06em}
+#devbar .act:hover{background:rgba(255,255,255,.08)}
+
+/* ============================================================
+   LANDING BACKDROP (context for the launcher)
+   ============================================================ */
+.wrap{max-width:1080px;margin:0 auto;padding:0 26px}
+nav.site{border-bottom:1px solid var(--line);position:sticky;top:56px;z-index:30;background:var(--bg)}
+.snav{display:flex;align-items:center;gap:14px;height:66px}
+.mark{width:34px;height:34px;border-radius:var(--rSm);background:var(--accent);display:grid;place-items:center;flex:none}
+.mark span{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);
+  display:grid;place-items:center;font-size:9px;font-weight:700}
+[data-theme="b"] .mark{background:transparent;border:1px solid var(--line)}
+[data-theme="b"] .mark span{background:transparent;color:var(--muted);font-family:var(--fMono)}
+[data-theme="c"] .mark{background:var(--ink);border-radius:0;transform:rotate(-2deg)}
+[data-theme="c"] .mark span{background:transparent;color:var(--surface);font-family:'Barlow Condensed';font-size:12px}
+.brand{font-family:var(--fHead);font-weight:var(--headWt);text-transform:var(--headTf);font-size:17px;letter-spacing:var(--headLs)}
+.snav .right{margin-left:auto}
+header.hero{padding:82px 0 96px}
+header.hero .eyebrow{font-family:var(--fMono);font-size:11px;letter-spacing:var(--lblLs);
+  text-transform:uppercase;color:var(--primary);font-weight:600}
+header.hero h1{font-size:clamp(38px,6vw,74px);margin:20px 0 22px;max-width:16ch}
+header.hero h1 em{font-style:normal;color:var(--primary)}
+header.hero p{font-size:18px;color:var(--muted);max-width:54ch}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--primary);color:var(--onPrimary);
+  border-radius:var(--rBtn);padding:16px 30px;font-weight:700;font-size:16px;margin-top:32px;
+  font-family:var(--fHead);text-transform:var(--headTf);letter-spacing:var(--headLs)}
+[data-theme="b"] .cta{font-family:var(--fMono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase}
+[data-theme="c"] .cta{box-shadow:5px 5px 0 var(--ink);font-size:20px;letter-spacing:.08em}
+.hint{margin-top:20px;font-size:13px;color:var(--dimmer)}
+
+/* ============================================================
+   LAUNCHER
+   ============================================================ */
+#launcher{
+  position:fixed;right:26px;bottom:26px;z-index:8000;display:flex;align-items:center;gap:12px;
+  background:var(--primary);color:var(--onPrimary);border-radius:var(--rBtn);
+  padding:15px 24px;font-weight:700;font-size:15px;box-shadow:0 16px 40px -16px rgba(0,0,0,.55);
+  font-family:var(--fHead);text-transform:var(--headTf);letter-spacing:var(--headLs);
+  transition:transform .18s ease,opacity .18s ease
+}
+#launcher:hover{transform:translateY(-3px)}
+#launcher.hidden{opacity:0;pointer-events:none;transform:translateY(14px) scale(.94)}
+[data-theme="b"] #launcher{font-family:var(--fMono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+[data-theme="c"] #launcher{box-shadow:5px 5px 0 var(--ink);font-size:19px}
+#launcher .dot{width:9px;height:9px;border-radius:50%;background:var(--onPrimary);opacity:.85;
+  animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+#launcher .badge{
+  position:absolute;top:-9px;right:-6px;background:var(--ink);color:var(--bg);
+  font-family:var(--fMono);font-size:10px;letter-spacing:.06em;padding:4px 9px;border-radius:999px;
+  border:2px solid var(--bg);display:none
+}
+#launcher.resume .badge{display:block}
+#launcher.resume .dot{background:var(--onPrimary)}
+
+/* ============================================================
+   CHAT PANEL
+   ============================================================ */
+#panel{
+  position:fixed;right:26px;bottom:26px;z-index:8100;width:432px;max-width:calc(100vw - 32px);
+  height:min(660px,calc(100vh - 100px));background:var(--panelBg);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;
+  transform-origin:bottom right;transition:transform .22s cubic-bezier(.2,.8,.3,1),opacity .18s
+}
+#panel.closed{opacity:0;pointer-events:none;transform:translateY(16px) scale(.96)}
+#panel.expanded{width:min(920px,calc(100vw - 52px));height:min(820px,calc(100vh - 100px))}
+[data-theme="c"] #panel{border:2px solid var(--ink)}
+
+.phead{background:var(--headerBg);color:var(--headerTxt);padding:14px 16px;display:flex;align-items:center;gap:12px;flex:none}
+.phead .avatar{width:34px;height:34px;border-radius:var(--rSm);background:var(--primary);
+  display:grid;place-items:center;color:var(--onPrimary);font-weight:700;font-size:12px;flex:none;
+  font-family:var(--fMono)}
+.phead .t{line-height:1.2;min-width:0}
+.phead .t b{font-size:14px;font-weight:600;display:block}
+.phead .t small{font-size:11px;opacity:.6;font-family:var(--fMono);letter-spacing:.09em;text-transform:uppercase}
+.phead .acts{margin-left:auto;display:flex;gap:4px}
+.phead .acts button{width:32px;height:32px;border-radius:var(--rSm);display:grid;place-items:center;
+  opacity:.65;font-size:15px}
+.phead .acts button:hover{opacity:1;background:rgba(255,255,255,.12)}
+.prog{height:3px;background:rgba(128,128,128,.22);flex:none}
+.prog i{display:block;height:100%;background:var(--primary);width:0;transition:width .4s ease}
+
+.msgs{flex:1;overflow-y:auto;padding:20px 16px 8px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+.msg{max-width:88%;display:flex;flex-direction:column;gap:8px;animation:rise .28s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.bot{align-self:flex-start}
+.msg.user{align-self:flex-end;align-items:flex-end;max-width:82%}
+.bub{padding:12px 15px;border-radius:var(--r);font-size:14.5px;line-height:1.5}
+.msg.bot .bub{background:var(--botBg);color:var(--botTxt);border-bottom-left-radius:var(--rSm)}
+.msg.user .bub{background:var(--userBg);color:var(--userTxt);border-bottom-right-radius:var(--rSm)}
+[data-theme="b"] .msg.bot .bub{border:1px solid var(--line)}
+[data-theme="c"] .msg.bot .bub{border:1.5px solid var(--ink)}
+[data-theme="c"] .msg.user .bub{border:1.5px solid var(--ink)}
+.bub b{font-weight:600}
+.bub .q{display:block;font-weight:600;margin-bottom:2px}
+.meta{font-family:var(--fMono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);padding:0 4px}
+
+.typing{display:flex;gap:5px;padding:15px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:bounce 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{opacity:.28;transform:translateY(0)}30%{opacity:.9;transform:translateY(-4px)}}
+
+/* option buttons */
+.opts{display:flex;flex-direction:column;gap:8px;width:100%;animation:rise .3s ease both}
+.opts.row{flex-direction:row;flex-wrap:wrap}
+.opt{
+  text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--txt);
+  border-radius:var(--rSm);padding:11px 14px;font-size:13.5px;line-height:1.45;
+  transition:border-color .14s,transform .14s,background .14s;display:flex;gap:11px;align-items:flex-start
+}
+.opt:hover{border-color:var(--primary);transform:translateX(2px)}
+[data-theme="c"] .opt{border:1.5px solid var(--ink)}
+[data-theme="c"] .opt:hover{box-shadow:3px 3px 0 var(--ink)}
+.opt .sc{font-family:var(--fMono);font-size:10px;font-weight:700;letter-spacing:.08em;
+  padding:3px 7px;border-radius:4px;flex:none;margin-top:1px}
+.opt .sc.s1{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
+.opt .sc.s3{background:color-mix(in srgb,var(--yellow) 20%,transparent);color:var(--yellow)}
+.opt .sc.s5{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)}
+.opt .short{font-weight:600;display:block;margin-bottom:3px}
+.opt .full{color:var(--muted);font-size:13px}
+.opt.compact{align-items:center}
+.opt.compact .full{display:none}
+.opt .expand{margin-left:auto;font-size:11px;color:var(--dimmer);font-family:var(--fMono);flex:none}
+.opt.compact.shown .full{display:block;margin-top:5px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:var(--rBtn);
+  padding:9px 14px;font-size:13px;font-weight:500;transition:.14s}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+[data-theme="c"] .chip{border:1.5px solid var(--ink);border-radius:2px}
+
+/* composer */
+.composer{flex:none;border-top:1px solid var(--line);padding:12px 14px;background:var(--panelBg)}
+.crow{display:flex;gap:9px;align-items:center}
+.crow input{
+  flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--rBtn);
+  padding:12px 16px;font-size:14px;color:var(--txt);font-family:inherit;outline:none;min-width:0
+}
+.crow input:focus{border-color:var(--primary)}
+.crow input::placeholder{color:var(--dimmer)}
+.send{width:42px;height:42px;border-radius:var(--rBtn);background:var(--primary);color:var(--onPrimary);
+  display:grid;place-items:center;flex:none;font-size:16px;font-weight:700}
+.send:disabled{opacity:.35;cursor:default}
+.cfoot{margin-top:9px;font-size:10.5px;color:var(--dimmer);font-family:var(--fMono);
+  letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;gap:10px}
+.cfoot button{text-decoration:underline;font-size:10.5px;font-family:inherit;letter-spacing:.08em;color:var(--dimmer);white-space:nowrap;flex:none}
+.cfoot span{min-width:0}
+.cfoot button:hover{color:var(--primary)}
+
+/* ============================================================
+   RESULT / HEATMAP
+   ============================================================ */
+.result{width:100%;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+[data-theme="c"] .result{border:1.5px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+.rtop{padding:18px;border-bottom:1px solid var(--line);display:flex;gap:18px;align-items:center}
+.dial{width:78px;height:78px;border-radius:50%;flex:none;display:grid;place-items:center}
+.dial b{width:60px;height:60px;border-radius:50%;background:var(--surface);display:grid;place-items:center;
+  font-size:21px;font-weight:700;font-family:var(--fHead)}
+.rtop .band{font-size:16px;font-weight:700;font-family:var(--fHead);text-transform:var(--headTf)}
+.rtop p{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+.rbody{padding:16px 18px}
+.pill-row{display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px}
+.pill-row .nm{font-family:var(--fMono);font-size:10px;letter-spacing:var(--lblLs);text-transform:uppercase;color:var(--dimmer)}
+.pill-row .v{font-family:var(--fMono);font-size:10px;color:var(--muted)}
+.hm{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.hm.two{grid-template-columns:repeat(2,1fr)}
+.cellx{border:1px solid var(--line);border-radius:var(--rSm);padding:10px 11px;background:var(--surface2);
+  display:grid;grid-template-columns:1fr auto;column-gap:8px;grid-template-areas:"id sc" "nm nm" "mtr mtr";min-height:88px;align-content:start}
+[data-theme="c"] .cellx{border:1.5px solid var(--ink)}
+.cellx .cid{grid-area:id;font-family:var(--fMono);font-size:9px;letter-spacing:.13em;color:var(--dimmer)}
+.cellx .csc{grid-area:sc;font-size:17px;font-weight:700;line-height:1;font-family:var(--fHead)}
+.cellx .cnm{grid-area:nm;font-size:11.5px;font-weight:600;line-height:1.3;margin-top:4px}
+.cellx .cmtr{grid-area:mtr;height:3px;border-radius:2px;background:rgba(128,128,128,.25);margin-top:10px;align-self:end;overflow:hidden}
+.cellx .cmtr i{display:block;height:100%;border-radius:2px}
+.ko{border:1px solid var(--red);background:color-mix(in srgb,var(--red) 10%,transparent);
+  border-radius:var(--rSm);padding:13px 14px;margin-top:16px}
+.ko .h{font-family:var(--fMono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--red);font-weight:700}
+.ko ul{margin:9px 0 0 16px;font-size:12.5px;color:var(--muted)}
+.ko li{margin-bottom:4px}
+.ractions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.rbtn{background:var(--primary);color:var(--onPrimary);border-radius:var(--rBtn);padding:13px 18px;
+  font-weight:700;font-size:14px;text-align:center;font-family:var(--fHead);text-transform:var(--headTf);letter-spacing:var(--headLs)}
+[data-theme="b"] .rbtn{font-family:var(--fMono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.rbtn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+[data-theme="c"] .rbtn{box-shadow:3px 3px 0 var(--ink)}
+
+/* legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.legend span{display:flex;align-items:center;gap:5px;font-family:var(--fMono);font-size:9px;
+  letter-spacing:.06em;color:var(--dimmer);text-transform:uppercase}
+.legend i{width:8px;height:8px;border-radius:2px}
+
+@media(max-width:520px){
+  #panel{right:8px;left:8px;bottom:8px;width:auto;height:calc(100vh - 76px)}
+  #launcher{right:14px;bottom:14px}
+  .hm{grid-template-columns:repeat(2,1fr)}
+  #devbar{gap:12px;padding:0 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== PROTOTYPE CONTROLS ===================== -->
+<div id="devbar">
+  <span class="tag">Prototype</span>
+  <div class="grp"><span class="tag">Style</span>
+    <div class="seg" id="segTheme">
+      <button data-theme="a">A · Atomic</button>
+      <button data-theme="b" class="on">B · Panel</button>
+      <button data-theme="c">C · Rugged</button>
+    </div>
+  </div>
+  <div class="grp"><span class="tag">Answers</span>
+    <div class="seg" id="segMode">
+      <button data-mode="full" class="on">Full anchors</button>
+      <button data-mode="compact">Compact</button>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="act" id="btnJump">Jump to results</button>
+    <button class="act" id="btnReturn">Simulate return visit</button>
+    <button class="act" id="btnReset">Reset</button>
+  </div>
+</div>
+
+<!-- ===================== LANDING BACKDROP ===================== -->
+<nav class="site"><div class="wrap snav">
+  <div class="mark"><span>A+B</span></div>
+  <div class="brand">Duct Tape</div>
+  <div class="right lbl">Atom &amp; Bits</div>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Free · 3 minutes · 8 questions</div>
+  <h1>Every operation runs on some <em>duct tape</em>.</h1>
+  <p>Find out where yours is holding — and where it's about to give. The assessment runs as a short
+     conversation, right here on the page.</p>
+  <button class="cta" id="heroCta">Start the assessment →</button>
+  <div class="hint">The launcher in the corner opens the same conversation. Try minimizing mid-question and coming back.</div>
+</div></header>
+
+<!-- ===================== LAUNCHER ===================== -->
+<button id="launcher">
+  <span class="dot"></span>
+  <span class="ltext">Start the assessment</span>
+  <span class="badge" id="lbadge"></span>
+</button>
+
+<!-- ===================== CHAT PANEL ===================== -->
+<div id="panel" class="closed" role="dialog" aria-label="Readiness assessment">
+  <div class="phead">
+    <div class="avatar">A+B</div>
+    <div class="t">
+      <b>Readiness Diagnostic</b>
+      <small id="phSub">8 questions · about 3 minutes</small>
+    </div>
+    <div class="acts">
+      <button id="btnExpand" title="Expand">⤢</button>
+      <button id="btnMin" title="Minimize">—</button>
+    </div>
+  </div>
+  <div class="prog"><i id="progBar"></i></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="composer">
+    <div class="crow">
+      <input id="input" placeholder="Type a question or your answer…" autocomplete="off">
+      <button class="send" id="send">↑</button>
+    </div>
+    <div class="cfoot">
+      <span id="cfootL">Nothing is saved until you ask for your readout</span>
+      <button id="btnRestart">Start over</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONTENT — sourced from the locked Conversational Diagnostic
+   playbook and the Tier 1 Vocabulary Mapping.
+   ============================================================ */
+
+const ROLES = [
+  "Operations","Technology","Human Resources","Executive Leader","Transformation",
+  "Finance","Security","Program Management","Product","Sales"
+];
+
+const LEX = {
+  "Operations":        {v:"floor throughput, SOPs, and shift handoffs", worry:"losing the one person who just knows how it runs", win:"standardizing a process that used to vary by shift"},
+  "Technology":        {v:"schemas, integration gaps, and technical debt", worry:"inheriting undocumented systems from a predecessor", win:"modernizing legacy systems without breaking what works"},
+  "Human Resources":   {v:"skills matrices, competency mapping, and change fatigue", worry:"a tenured person leaving with knowledge nobody wrote down", win:"turning skeptical frontline staff into advocates"},
+  "Executive Leader":  {v:"capital allocation, enterprise risk, and cost of inaction", worry:"approving an investment that becomes a visible board-level failure", win:"funding the unglamorous groundwork that made a rollout work"},
+  "Transformation":    {v:"change velocity, sponsorship, and the adoption curve", worry:"losing executive air cover mid-rollout", win:"getting a skeptical stakeholder group to real buy-in"},
+  "Finance":           {v:"payback period, budget exposure, and audit trail", worry:"funding a tool that never shows measurable ROI", win:"building a credible payback model before committing capital"},
+  "Security":          {v:"attack surface, access controls, and data lineage", worry:"an AI tool creating a new, unreviewed attack surface", win:"getting security embedded early instead of bolted on late"},
+  "Program Management":{v:"critical path, dependencies, and milestone slippage", worry:"a hidden dependency derailing a “simple” rollout", win:"catching a dependency early enough to resequence around it"},
+  "Product":           {v:"roadmap tradeoffs, feature debt, and adoption", worry:"shipping a feature nobody adopts", win:"shipping something that actually got adopted, not just launched"},
+  "Sales":             {v:"deal risk, discovery gaps, and the messy middle", worry:"a deal closing on assumptions that don't survive implementation", win:"catching a readiness gap during discovery"}
+};
+
+const INDUSTRY_SAMPLES = [
+  "Automotive parts manufacturing",
+  "Regional healthcare network",
+  "Food &amp; beverage distribution",
+  "Municipal government"
+];
+
+const Q = [
+  { id:"D01", name:"Workflow Maturity", pillar:"core",
+    q:"When your team follows a process — a customer order, a maintenance ticket, a monthly report — how standardized is the path from start to finish?",
+    a:[{s:1,short:"Everyone does it their own way",full:"Two people handling the same task produce different steps, different tools, different results."},
+       {s:3,short:"Documented, but often bypassed",full:"There's a documented standard process, but people deviate from it regularly when things get busy or unusual."},
+       {s:5,short:"Standardized and followed",full:"The process is standardized, documented, and consistently followed; deviations are rare and get flagged."}],
+    r:{1:"That's the most common answer I get, and it's not a character flaw — it's what happens when a process grows faster than anyone had time to write it down.",
+       3:"Documented-but-bypassed is the honest middle. The gap between the written process and the busy-Tuesday process is usually where automation quietly breaks.",
+       5:"That's a real asset. A standardized process is the cheapest thing to automate, because there's only one version of it to teach."} },
+
+  { id:"D02", name:"Legacy Knowledge Risk", pillar:"core", ko:"Single-Point-of-Failure",
+    q:"If your most experienced person in this area left tomorrow with no notice, how much would break?",
+    a:[{s:1,short:"A huge amount",full:"Critical process knowledge lives in one person's head — nothing is written down, and no one else could pick it up."},
+       {s:3,short:"Some disruption",full:"Key knowledge is partially documented, but real proficiency still depends heavily on a few tenured people."},
+       {s:5,short:"Minimal disruption",full:"Processes are documented well enough that someone new could follow them without that person's help."}],
+    r:{1:"Noted, and flagged. That's a single point of failure, and it outranks almost everything else on this list — {worry} is a risk you can't automate your way around.",
+       3:"Partially documented is workable. The exposure is that documentation covers the normal path and the tenured people cover everything else.",
+       5:"Good. Legacy knowledge that's actually written down is the difference between a tool that helps and a tool that has nothing to learn from."} },
+
+  { id:"D03", name:"Operational Clarity", pillar:"core", ko:"Branching SOP",
+    q:"If you looked at how this process runs across your different teams, shifts, or locations, how consistent would you find it?",
+    a:[{s:1,short:"Wildly inconsistent",full:"Three or more locations or teams do this in fundamentally different ways, with no shared standard."},
+       {s:3,short:"Mostly consistent",full:"Some local variation everyone's aware of but hasn't reconciled."},
+       {s:5,short:"One standard everywhere",full:"One standard applies everywhere, with clear, documented exceptions where it doesn't."}],
+    r:{1:"That's a branching SOP, and it's a knockout condition. Three ways of doing one thing means three things to automate — that's a cost multiplier, not a rollout.",
+       3:"Known variation is manageable variation. The work is deciding which local version becomes the standard, and that's a people conversation before it's a systems one.",
+       5:"One standard with documented exceptions is exactly the shape this needs to be in."} },
+
+  { id:"D04", name:"Human Adoption Readiness", pillar:"human", ko:"Active Sabotage",
+    q:"When you've rolled out new tools or software in this area before, how did frontline staff respond?",
+    a:[{s:1,short:"Active resistance",full:"Supervisors or frontline staff openly pushed back, worked around the tool, or refused to use it."},
+       {s:3,short:"Passive compliance",full:"People used it because they had to, not because they wanted to; adoption never really stuck."},
+       {s:5,short:"Real buy-in",full:"People adopted it, gave feedback, and it became part of how work actually gets done."}],
+    r:{1:"That's a knockout, and it's worth saying plainly: resistance is usually information. People work around tools that make their day harder, and that history follows the next rollout.",
+       3:"Passive compliance is the quiet killer. It looks like adoption in the usage numbers and behaves like rejection everywhere else.",
+       5:"That's rarer than you'd think, and it's the single best predictor that the next rollout lands. {win} is a track record worth naming out loud."} },
+
+  { id:"D05", name:"Leadership Alignment", pillar:"human",
+    q:"How aligned are your executive team, IT/operations, and frontline managers on what an AI tool in this area should actually do?",
+    a:[{s:1,short:"Not aligned at all",full:"Leadership expects something close to magic, delivered fast, while ops and IT know the underlying data and process aren't ready."},
+       {s:3,short:"Partially aligned",full:"Leadership understands this is a tool, not magic, but budget and attention still skew toward flashy features over foundational fixes."},
+       {s:5,short:"Fully aligned",full:"Leadership is funding the unglamorous groundwork — data cleanup, training, change management — right alongside the tool itself."}],
+    r:{1:"That gap between expectation and reality is where most budgets go to die. Worth closing before anything gets bought.",
+       3:"That's most organizations. The tell is where the money goes: flashy features get funded, data cleanup gets a volunteer.",
+       5:"Leadership funding the unglamorous parts is the strongest signal on this whole assessment."} },
+
+  { id:"D06", name:"Governance &amp; Trust", pillar:"gov",
+    q:"If an AI tool produced an output that was subtly wrong, how confident are you that someone would catch it before it caused a problem?",
+    a:[{s:1,short:"Not confident",full:"There's no review step; people would likely treat the output as correct and act on it."},
+       {s:3,short:"Somewhat confident",full:"There's informal spot-checking, but no consistent process for verifying AI output before it's used."},
+       {s:5,short:"Very confident",full:"There's a defined review step, clear ownership, and an audit trail for AI-assisted decisions."}],
+    r:{1:"Subtly wrong is the dangerous kind — obviously wrong gets caught. Without a review step, the first real error surfaces as a customer problem.",
+       3:"Informal spot-checking works right up until the person doing it is on leave.",
+       5:"A defined review step with named ownership is what makes AI output usable in a decision rather than just interesting."} },
+
+  { id:"D07", name:"Data Reliability", pillar:"gov", ko:"Shadow Source",
+    q:"Where does the data that would feed this AI tool actually come from today?",
+    a:[{s:1,short:"Spreadsheets and paper logs",full:"Mostly personal spreadsheets, paper logs, or one person's manual tracking — not the official system of record."},
+       {s:3,short:"Official system, with gaps",full:"Mostly the official system, but with known gaps, duplicates, or manual patches people have learned to work around."},
+       {s:5,short:"The system of record",full:"The official system of record, consistently maintained, with clear ownership of data quality."}],
+    r:{1:"That's a shadow source, and it's a knockout. If the real numbers live in someone's spreadsheet, the official system isn't the system — it's the paperwork.",
+       3:"Known gaps are survivable. Manual patches are the part to watch: every workaround is a rule nobody wrote down.",
+       5:"A maintained system of record with named ownership is the thing most organizations skip and then wish they hadn't."} },
+
+  { id:"D08", name:"Organizational Learning Capacity", pillar:"human",
+    q:"When your business rules or processes change, how quickly can your tools and training catch up?",
+    a:[{s:1,short:"Very slowly",full:"Any change requires redoing training materials and reconfiguring tools from scratch, with real risk of breaking what already works."},
+       {s:3,short:"Reasonably",full:"Changes can be incorporated, but it takes deliberate effort and careful testing before anyone trusts the update."},
+       {s:5,short:"Quickly",full:"Your systems and training are modular enough that a change in one area doesn't require reworking everything else."}],
+    r:{1:"That rigidity compounds. A tool you can't update is a tool that slowly stops matching how you actually work.",
+       3:"Deliberate and tested is a perfectly good speed. It just needs to be planned for rather than discovered.",
+       5:"Modular enough to absorb change is the quiet superpower here."} }
+];
+
+const FAQ = [
+  {k:["how long","how many questions","time","minutes","quick"],
+   a:"Eight questions, about three minutes. You'll get your result on screen the moment you finish — there's no form to fill in first."},
+  {k:["why","role","need my role","asking my role"],
+   a:"So I can use language that matches your world rather than generic consulting-speak. An operations lead and a security lead are looking at the same risks through very different lenses."},
+  {k:["data","privacy","save","store","gdpr","email","spam"],
+   a:"Nothing leaves this conversation unless you ask for your readout to be sent. There's no email gate on the result itself."},
+  {k:["skip","don't know","not sure","unsure","dunno"],
+   a:"You can pick the closest match and move on — the score is a directional read, not an audit. If a question genuinely doesn't apply, tell me and I'll note it."},
+  {k:["cost","price","free","how much","pay"],
+   a:"This part is free. If the result suggests it's worth going deeper, there's a paid working session at the end — but nothing here is gated behind it."},
+  {k:["who are you","what is this","bot","human","real person"],
+   a:"I'm the readiness diagnostic from Atom &amp; Bits — a structured assessment, not a general-purpose assistant. Karina McGill is the person behind it."},
+  {k:["what happens","after","result","score","report","get back"],
+   a:"You get a composite readiness score, a heatmap across eight dimensions, and any risk severe enough to override the average — on screen, right away."},
+  {k:["accurate","reliable","how does scoring","weighted","how is it scored"],
+   a:"Three weighted areas: operational core at 40%, human and adoption at 35%, governance and data at 25%. Four of the eight dimensions can override the composite on their own if they come back at the lowest anchor."},
+  {k:["duct tape","name","why called"],
+   a:"Because every operation has some. The workaround that was only ever meant to be temporary, the process that works because one person remembers how. The useful question is which ones are load-bearing."}
+];
+
+/* ============================================================
+   STATE + SCORING
+   NOTE: in the production build this math does NOT live in the
+   chat layer — Botpress passes raw 1/3/5 scores to the n8n
+   scoring webhook, which is the single source of truth. This is
+   a front-end simulation so the prototype can render a result.
+   ============================================================ */
+const S = { theme:"b", mode:"full", open:false, step:"role", role:null, industry:null,
+            scores:[], returning:false, busy:false };
+
+const BANDS = { GREEN:[4.2,5.0], YELLOW:[2.8,4.1], RED:[1.0,2.7] };
+function bandOf(v){ if(v>=4.2) return "GREEN"; if(v>=2.8) return "YELLOW"; return "RED"; }
+function score(){
+  const g=(idxs)=>idxs.reduce((a,i)=>a+S.scores[i],0)/idxs.length;
+  const core=g([0,1,2]), human=g([3,4,7]), gov=g([5,6]);
+  const composite = core*0.40 + human*0.35 + gov*0.25;
+  const fired = Q.map((d,i)=> d.ko && S.scores[i]===1 ? {name:d.ko, dim:d.name} : null).filter(Boolean);
+  const band = fired.length ? "RED" : bandOf(composite);
+  return {core,human,gov,composite,band,fired};
+}
+
+/* ============================================================
+   DOM
+   ============================================================ */
+const $ = s=>document.querySelector(s);
+const msgs=$("#msgs"), panel=$("#panel"), launcher=$("#launcher"), input=$("#input");
+
+function esc(s){return s;}
+function bot(html, opts={}){
+  const m=document.createElement("div"); m.className="msg bot";
+  m.innerHTML=`<div class="bub">${html}</div>`;
+  if(opts.meta) m.insertAdjacentHTML("afterbegin",`<div class="meta">${opts.meta}</div>`);
+  msgs.appendChild(m); scroll(); return m;
+}
+function user(text){
+  const m=document.createElement("div"); m.className="msg user";
+  m.innerHTML=`<div class="bub">${text}</div>`;
+  msgs.appendChild(m); scroll(); return m;
+}
+function scroll(){ requestAnimationFrame(()=>{ msgs.scrollTop=msgs.scrollHeight; }); }
+function typing(){
+  const m=document.createElement("div"); m.className="msg bot t-ind";
+  m.innerHTML=`<div class="bub typing"><i></i><i></i><i></i></div>`;
+  msgs.appendChild(m); scroll(); return m;
+}
+async function say(html, delay=620, opts={}){
+  S.busy=true;
+  const t=typing(); await wait(delay); t.remove();
+  const m=bot(html,opts); S.busy=false; return m;
+}
+const wait = ms=>new Promise(r=>setTimeout(r,ms));
+
+function optionBlock(children){
+  const d=document.createElement("div"); d.className="opts";
+  msgs.appendChild(d); children(d); scroll(); return d;
+}
+function progress(){
+  const done = S.step==="result" ? 8 : S.scores.length;
+  $("#progBar").style.width = (done/8*100)+"%";
+  $("#phSub").textContent = S.step==="result" ? "Complete · your readout"
+    : S.scores.length ? `Question ${S.scores.length+1} of 8` : "8 questions · about 3 minutes";
+  if(S.scores.length && S.step!=="result"){
+    launcher.classList.add("resume");
+    $("#lbadge").textContent = `${S.scores.length}/8`;
+    $(".ltext").textContent = "Resume — you're partway through";
+  }
+}
+
+/* ============================================================
+   FLOW
+   ============================================================ */
+async function start(){
+  msgs.innerHTML="";
+  S.step="role"; S.role=null; S.industry=null; S.scores=[];
+  progress();
+  await say(`Hi — I'm the readiness diagnostic from <b>Atom &amp; Bits</b>. Eight questions, about three minutes, and you'll see your result right here. No email needed.`, 500);
+  await say(`First, so I use language that matches your world rather than generic consulting-speak: <span class="q">Which of these is closest to your role?</span>`, 700);
+  optionBlock(d=>{
+    d.className="opts row";
+    ROLES.forEach(r=>{
+      const b=document.createElement("button"); b.className="chip"; b.textContent=r;
+      b.onclick=()=>pickRole(r,d); d.appendChild(b);
+    });
+  });
+}
+
+async function pickRole(r,block){
+  block.remove(); user(r); S.role=r; S.step="industry"; progress();
+  const lex=LEX[r];
+  if(r==="Executive Leader"){
+    await say(`Got it. I'll keep this at the level you actually make decisions at — ${lex.v} — rather than walking you through process minutiae.`, 700);
+  } else {
+    await say(`Got it. I'll frame these in terms of ${lex.v}.`, 650);
+  }
+  await say(`<span class="q">And what industry are you in?</span> Type whatever's accurate — I'm not going to make you pick from a dropdown that doesn't fit.`, 700);
+  optionBlock(d=>{
+    d.className="opts row";
+    INDUSTRY_SAMPLES.forEach(s=>{
+      const b=document.createElement("button"); b.className="chip"; b.innerHTML=s;
+      b.onclick=()=>pickIndustry(b.textContent,d); d.appendChild(b);
+    });
+  });
+  input.placeholder="e.g. Automotive parts manufacturing";
+}
+
+async function pickIndustry(v,block){
+  if(block) block.remove(); else document.querySelectorAll(".opts").forEach(o=>o.remove());
+  user(v); S.industry=v; S.step="q"; progress();
+  input.placeholder="Type a question, or pick an answer above…";
+  await say(`${v} — good. That context shapes how I read a couple of these.`, 600);
+  await say(`Here's how it works: each question has three answers. Pick the one that's true on a normal Tuesday, not the one that looks good in a deck. There's no 2 or 4 — just the three descriptions.`, 800);
+  askQ();
+}
+
+async function askQ(){
+  const i=S.scores.length;
+  if(i>=8) return finish();
+  const d=Q[i];
+  await say(`<span class="q">${d.q}</span>`, 620, {meta:`Question ${i+1} of 8 · ${d.name}`});
+  optionBlock(block=>{
+    d.a.forEach(opt=>{
+      const b=document.createElement("button");
+      b.className="opt"+(S.mode==="compact"?" compact":"");
+      b.innerHTML=`<span class="sc s${opt.s}">${opt.s}</span>
+        <span><span class="short">${opt.short}</span><span class="full">${opt.full}</span></span>
+        ${S.mode==="compact"?'<span class="expand">?</span>':''}`;
+      b.onclick=(e)=>{
+        if(S.mode==="compact" && e.target.classList.contains("expand")){
+          b.classList.toggle("shown"); return;
+        }
+        answer(opt, d, block);
+      };
+      block.appendChild(b);
+    });
+  });
+}
+
+async function answer(opt, d, block){
+  block.remove();
+  user(S.mode==="compact" ? opt.short : `${opt.short} — ${opt.full}`);
+  S.scores.push(opt.s); progress();
+  const lex=LEX[S.role]||{worry:"",win:""};
+  let react = d.r[opt.s].replace("{worry}",lex.worry).replace("{win}",lex.win);
+  await say(react, 700);
+  if(S.scores.length===4){
+    await say(`Halfway. Four to go — these last ones are about governance, data, and how fast you can change.`, 520);
+  }
+  askQ();
+}
+
+async function finish(){
+  S.step="result"; progress();
+  await say(`That's all eight. Give me a second to put your readout together…`, 500);
+  const t=typing(); await wait(1100); t.remove();
+  renderResult();
+}
+
+/* ============================================================
+   RESULT + HEATMAP
+   ============================================================ */
+function bandColor(b){ return b==="GREEN"?"var(--green)":b==="YELLOW"?"var(--yellow)":"var(--red)"; }
+function bandLabel(b){ return b==="GREEN"?"Holding well":b==="YELLOW"?"Holding — for now":"At risk"; }
+
+function renderResult(){
+  const r=score(), lex=LEX[S.role]||{};
+  const pct = (r.composite-1)/4*100;
+  const summary = r.fired.length
+    ? `A critical risk fired, so the overall status is red regardless of the average. That's deliberate — a single catastrophic answer shouldn't get diluted by the numbers around it.`
+    : r.band==="GREEN"
+      ? `You're in good shape. The groundwork is there, which means the conversation can be about what to build rather than what to fix first.`
+      : `The average is survivable, and the specifics are where the work is. Look at the red and amber cells below — that's your sequence.`;
+
+  const m=document.createElement("div"); m.className="msg bot"; m.style.maxWidth="100%";
+  m.innerHTML=`<div class="result">
+    <div class="rtop">
+      <div class="dial" style="background:conic-gradient(${bandColor(r.band)} 0 ${pct}%, rgba(128,128,128,.18) ${pct}% 100%)">
+        <b>${r.composite.toFixed(1)}</b>
+      </div>
+      <div>
+        <div class="lbl">Composite readiness · ${S.role} · ${S.industry}</div>
+        <div class="band" style="color:${bandColor(r.band)}">${bandLabel(r.band)}</div>
+        <p>${summary}</p>
+      </div>
+    </div>
+    <div class="rbody">
+      <div class="legend">
+        <span><i style="background:var(--red)"></i>1 · At risk</span>
+        <span><i style="background:var(--yellow)"></i>3 · Watch</span>
+        <span><i style="background:var(--green)"></i>5 · Solid</span>
+      </div>
+      <div class="pill-row"><span class="nm">Operational core</span><span class="v">weight 40% · avg ${r.core.toFixed(1)}</span></div>
+      <div class="hm">${[0,1,2].map(i=>cellFor(i)).join("")}</div>
+      <div class="pill-row"><span class="nm">Human &amp; adoption</span><span class="v">weight 35% · avg ${r.human.toFixed(1)}</span></div>
+      <div class="hm">${[3,4,7].map(i=>cellFor(i)).join("")}</div>
+      <div class="pill-row"><span class="nm">Governance &amp; data</span><span class="v">weight 25% · avg ${r.gov.toFixed(1)}</span></div>
+      <div class="hm two">${[5,6].map(i=>cellFor(i)).join("")}</div>
+      ${r.fired.length?`<div class="ko"><div class="h">⚠ Critical risk triggered</div>
+        <ul>${r.fired.map(f=>`<li><b>${f.name}</b> — ${f.dim} — forced system status to RED.</li>`).join("")}</ul></div>`:""}
+      <div class="ractions">
+        <button class="rbtn" id="ctaBook">Book a working session →</button>
+        <button class="rbtn ghost" id="ctaEmail">Email me this readout</button>
+        <button class="rbtn ghost" id="ctaAgain">Run it again</button>
+      </div>
+    </div>
+  </div>`;
+  msgs.appendChild(m); scroll();
+
+  m.querySelector("#ctaAgain").onclick=()=>start();
+  m.querySelector("#ctaEmail").onclick=async()=>{
+    user("Email me this readout");
+    await say(`Sure — what's the best address? <span class="q">This is the only point where I ask for one</span>, and it's after you've already seen your result.`,600);
+    input.placeholder="you@company.com"; input.focus();
+  };
+  m.querySelector("#ctaBook").onclick=async()=>{
+    user("Book a working session");
+    await say(`Based on your operational footprint, the next step is an executive interview workshop — a deeper diagnostic run with your leadership team to pressure-test these findings and map a sequence.`,700);
+    await say(`<b>[ Prototype ]</b> In the live build this hands off to the booking calendar. Nothing is booked here.`,600);
+  };
+  setTimeout(async()=>{
+    await say(`One more thing worth saying: ${lex.win?`in your world, ${lex.win} is the kind of thing this makes visible.`:"this is a directional read, not an audit."} If you want it stress-tested with the people who'd have to fund it, that's what the working session is for.`, 900);
+  }, 400);
+}
+function cellFor(i){
+  const d=Q[i], s=S.scores[i], b=bandOf(s), c=bandColor(b);
+  return `<div class="cellx">
+    <span class="cid">${d.id}</span>
+    <span class="csc" style="color:${c}">${s}.0</span>
+    <span class="cnm">${d.name}</span>
+    <span class="cmtr"><i style="width:${s/5*100}%;background:${c}"></i></span>
+  </div>`;
+}
+
+/* ============================================================
+   FREE TEXT — off-script questions
+   ============================================================ */
+async function handleText(raw){
+  const t=raw.toLowerCase().trim();
+  if(!t) return;
+  user(raw);
+  input.value="";
+
+  if(S.step==="industry"){ document.querySelectorAll(".opts").forEach(o=>o.remove()); return pickIndustry(raw,null); }
+
+  if(/@/.test(raw) && S.step==="result"){
+    return say(`Sent — your readout is on its way to <b>${raw}</b>. <b>[ Prototype ]</b> nothing was actually emailed.`,600);
+  }
+
+  const hit = FAQ.find(f=>f.k.some(k=>t.includes(k)));
+  if(hit){
+    await say(hit.a, 650);
+    if(S.step==="q" && S.scores.length<8){
+      await say(`Back to it — <span class="q">${Q[S.scores.length].q}</span>`, 600);
+      const d=Q[S.scores.length];
+      optionBlock(block=>{
+        d.a.forEach(opt=>{
+          const b=document.createElement("button");
+          b.className="opt"+(S.mode==="compact"?" compact":"");
+          b.innerHTML=`<span class="sc s${opt.s}">${opt.s}</span>
+            <span><span class="short">${opt.short}</span><span class="full">${opt.full}</span></span>
+            ${S.mode==="compact"?'<span class="expand">?</span>':''}`;
+          b.onclick=(e)=>{
+            if(S.mode==="compact"&&e.target.classList.contains("expand")){b.classList.toggle("shown");return;}
+            answer(opt,d,block);
+          };
+          block.appendChild(b);
+        });
+      });
+    }
+    return;
+  }
+  if(S.step==="role"){ return say(`I need a role first so I can pitch these questions right — pick the closest one above, even if it's not exact.`,600); }
+  await say(`I'm a diagnostic rather than a general assistant, so I may not be much use on that one. I can tell you how the assessment works, what happens to your answers, or how the scoring is weighted. ${S.step==="q"?"Otherwise, pick the answer above that's closest to true.":""}`, 700);
+}
+
+/* ============================================================
+   OPEN / MINIMIZE / RETURN
+   ============================================================ */
+function openPanel(){
+  S.open=true; panel.classList.remove("closed"); launcher.classList.add("hidden");
+  if(!msgs.children.length) start();
+  else if(S.returning){ S.returning=false; welcomeBack(); }
+  setTimeout(()=>input.focus(),260);
+}
+function closePanel(){
+  S.open=false; panel.classList.add("closed"); launcher.classList.remove("hidden");
+  panel.classList.remove("expanded");
+}
+async function welcomeBack(){
+  const n=S.scores.length;
+  if(!n) return;
+  document.querySelectorAll(".opts").forEach(o=>o.remove()); // clear the question they abandoned
+  await say(`Welcome back. You were on <b>question ${n+1} of 8</b> — I kept your answers. Want to pick up where you left off, or start fresh?`, 600);
+  optionBlock(d=>{
+    d.className="opts row";
+    const a=document.createElement("button"); a.className="chip"; a.textContent=`Continue from question ${n+1}`;
+    a.onclick=()=>{ d.remove(); user("Continue"); askQ(); };
+    const b=document.createElement("button"); b.className="chip"; b.textContent="Start over";
+    b.onclick=()=>{ d.remove(); start(); };
+    d.append(a,b);
+  });
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+launcher.onclick=openPanel;
+$("#heroCta").onclick=openPanel;
+$("#btnMin").onclick=closePanel;
+$("#btnExpand").onclick=()=>panel.classList.toggle("expanded");
+$("#btnRestart").onclick=()=>start();
+$("#send").onclick=()=>handleText(input.value);
+input.addEventListener("keydown",e=>{ if(e.key==="Enter") handleText(input.value); });
+
+$("#segTheme").onclick=e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#segTheme button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); S.theme=b.dataset.theme;
+  document.documentElement.setAttribute("data-theme",S.theme);
+};
+$("#segMode").onclick=e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  document.querySelectorAll("#segMode button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); S.mode=b.dataset.mode;
+  document.querySelectorAll(".opt").forEach(o=>{
+    o.classList.toggle("compact",S.mode==="compact");
+    if(S.mode==="compact" && !o.querySelector(".expand")){
+      o.insertAdjacentHTML("beforeend",'<span class="expand">?</span>');
+    }
+  });
+};
+$("#btnReset").onclick=()=>{ S.returning=false; launcher.classList.remove("resume");
+  $(".ltext").textContent="Start the assessment"; closePanel(); msgs.innerHTML=""; S.scores=[]; progress(); };
+$("#btnReturn").onclick=()=>{
+  if(!S.scores.length){ alert("Answer a couple of questions first, then try this — it simulates leaving and coming back."); return; }
+  S.returning=true; closePanel();
+};
+$("#btnJump").onclick=async()=>{
+  // open WITHOUT triggering the auto-start greeting, then seed a sample run
+  S.open=true; panel.classList.remove("closed"); launcher.classList.add("hidden");
+  S.role="Operations"; S.industry="Automotive parts manufacturing";
+  S.scores=[3,1,3,3,3,3,1,5];
+  msgs.innerHTML="";
+  await say(`<b>[ Prototype shortcut ]</b> Jumping straight to a sample result — role <b>${S.role}</b>, industry <b>${S.industry}</b>, with two knockout triggers fired.`,400);
+  S.step="result"; progress(); renderResult();
+};
+
+document.documentElement.setAttribute("data-theme","b");
+progress();
+</script>
+</body>
+</html>
